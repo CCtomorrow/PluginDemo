@@ -1,1 +1,1 @@
-include ':app', ':pluginlib', ':app2'
+include ':dynamic_proxy'
