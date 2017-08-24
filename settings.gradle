@@ -1,1 +1,1 @@
-include ':dynamic_proxy', ':binder_sample', ':javaproxy'
+include ':dynamic_proxy', ':binder_sample', ':javaproxy', ':javareflection'
