@@ -1,10 +1,9 @@
 package com.example.activityplugin;
 
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.activityplugin.manager.HookManager;
+import com.qyai.activityplugin.manager.HookManager;
 
 /**
  * <b>Project:</b> PluginDemo <br>
@@ -13,7 +12,7 @@ import com.example.activityplugin.manager.HookManager;
  * <b>Address:</b> qingyongai@gmail.com <br>
  * <b>Description:</b>  <br>
  */
-public class App extends Application {
+public class Application extends android.app.Application {
 
     @Override
     protected void attachBaseContext(Context base) {

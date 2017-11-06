@@ -1,11 +1,11 @@
-package com.example.activityplugin.manager;
+package com.qyai.activityplugin.manager;
 
 import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Handler;
 
-import com.example.activityplugin.hcallback.PluginHandlerH;
-import com.example.activityplugin.instrumentation.PluginInstrumentation;
+import com.qyai.activityplugin.hcallback.PluginHandlerH;
+import com.qyai.activityplugin.instrumentation.PluginInstrumentation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

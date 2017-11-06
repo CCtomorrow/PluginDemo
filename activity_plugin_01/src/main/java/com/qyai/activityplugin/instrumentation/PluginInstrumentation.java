@@ -1,4 +1,4 @@
-package com.example.activityplugin.instrumentation;
+package com.qyai.activityplugin.instrumentation;
 
 import android.app.Activity;
 import android.app.Instrumentation;
