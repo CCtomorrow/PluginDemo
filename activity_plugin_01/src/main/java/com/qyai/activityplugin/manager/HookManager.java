@@ -1,10 +1,12 @@
 package com.qyai.activityplugin.manager;
 
+import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Handler;
 
 import com.qyai.activityplugin.hcallback.PluginHandlerH;
+import com.qyai.activityplugin.instrumentation.ComponentResolver;
 import com.qyai.activityplugin.instrumentation.PluginInstrumentation;
 
 import java.lang.reflect.Field;
@@ -22,14 +24,23 @@ public class HookManager {
 
     private static volatile HookManager sManager;
 
-    private HookManager() {
+    private Context mHostContext;
+    private ComponentResolver mComponentResolver;
+
+    private HookManager(Context context) {
+        Context app = context.getApplicationContext();
+        if (app == null) {
+            this.mHostContext = context;
+        } else {
+            this.mHostContext = ((Application) app).getBaseContext();
+        }
     }
 
-    public static HookManager getManager() {
+    public static HookManager getManager(Context context) {
         if (sManager == null) {
             synchronized (HookManager.class) {
                 if (sManager == null) {
-                    sManager = new HookManager();
+                    sManager = new HookManager(context);
                 }
             }
         }
@@ -56,6 +67,24 @@ public class HookManager {
      * {@link android.app.ActivityThread#mH}对象
      */
     private Handler mH = null;
+
+    /**
+     * 获取宿主的Context
+     *
+     * @return
+     */
+    public Context getHostContext() {
+        return mHostContext;
+    }
+
+    /**
+     * 获取{@link ComponentResolver}对象，主要用于解析一些信息
+     *
+     * @return
+     */
+    public ComponentResolver getComponentResolver() {
+        return mComponentResolver;
+    }
 
     /**
      * 获取ActivityThread Class对象
@@ -182,6 +211,7 @@ public class HookManager {
     /*------------------------------下面是一系列的Replace方法------------------------------*/
 
     public void init() {
+        mComponentResolver = new ComponentResolver(this);
         replaceInstrumentation();
         replaceHandlerH();
     }
@@ -191,7 +221,7 @@ public class HookManager {
      */
     public void replaceInstrumentation() {
         if (getInstrumentation() != null && !(getInstrumentation() instanceof PluginInstrumentation)) {
-            PluginInstrumentation instrumentation = new PluginInstrumentation(getInstrumentation());
+            PluginInstrumentation instrumentation = new PluginInstrumentation(getInstrumentation(), this);
             if (getInstrumentationField() != null && getActivityThread() != null) {
                 // 拿到原始的 mInstrumentation 字段
                 getInstrumentationField().setAccessible(true);

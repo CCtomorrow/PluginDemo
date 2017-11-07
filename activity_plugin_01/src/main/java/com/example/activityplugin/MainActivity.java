@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         String language = locale.getLanguage();
         String country = locale.getCountry();
         textView.setText("language:" + language + "\n" + "country:" + country);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
     }
 
     public void launchSampleAct(View view) {

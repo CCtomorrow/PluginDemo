@@ -18,7 +18,7 @@ public class Application extends android.app.Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         long start = System.currentTimeMillis();
-        HookManager.getManager().init();
+        HookManager.getManager(this).init();
         Log.i("qy", "hook use time:" + (System.currentTimeMillis() - start));
     }
 }

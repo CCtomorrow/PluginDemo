@@ -6,8 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.TextUtils;
+import android.util.Log;
 
-import java.lang.reflect.InvocationTargetException;
+import com.qyai.activityplugin.manager.HookManager;
+
 import java.lang.reflect.Method;
 
 /**
@@ -19,12 +22,14 @@ import java.lang.reflect.Method;
  */
 public class PluginInstrumentation extends Instrumentation {
 
+    private static final String TAG = "PluginInstrumentation";
+
     private Instrumentation mOrigin;
+    private HookManager mHookManager;
 
-    private static final String RESOURCES_PACKAGE_NAME = "com.example.activityplugin";
-
-    public PluginInstrumentation(Instrumentation origin) {
+    public PluginInstrumentation(Instrumentation origin, HookManager manager) {
         this.mOrigin = origin;
+        this.mHookManager = manager;
     }
 
     /**
@@ -52,40 +57,28 @@ public class PluginInstrumentation extends Instrumentation {
      * @see Activity#startActivityFromChild
      * <p>
      */
+    @Override
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, Activity target,
             Intent intent, int requestCode, Bundle options) {
-        // 由于这个方法是隐藏的,因此需要使用反射调用;首先找到这个方法
+        // 隐式Intent的转换
+        mHookManager.getComponentResolver().implicitToExplicit(intent);
+        // Intent的重新解析
+        if (intent.getComponent() != null) {
+            mHookManager.getComponentResolver().reMakeIntent(intent);
+        }
+        // 由于这个方法是隐藏的,因此需要使用反射调用,首先找到这个方法
         try {
             Method execStartActivity = Instrumentation.class.getDeclaredMethod(
                     "execStartActivity", Context.class, IBinder.class, IBinder.class,
                     Activity.class, Intent.class, int.class, Bundle.class);
             execStartActivity.setAccessible(true);
-            // TODO: 2017/10/27 这里把intent里面的class替换成Manifest里面注册的
-            reWarpIntent(who, intent);
             return (ActivityResult) execStartActivity.invoke(mOrigin,
                     who, contextThread, token, target, intent, requestCode, options);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
-    }
-
-    /**
-     * 对Intent做一些修改
-     *
-     * @param context
-     * @param intent
-     */
-    private void reWarpIntent(Context context, Intent intent) {
-        // TODO: 2017/10/27 判断
-        if (!intent.getComponent().getClassName().contains("MainActivity")) {
-            intent.setClassName(context.getPackageName(), RESOURCES_PACKAGE_NAME + ".A$1");
-        }
     }
 
     /**
@@ -102,12 +95,15 @@ public class PluginInstrumentation extends Instrumentation {
     @Override
     public Activity newActivity(ClassLoader cl, String className, Intent intent)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        // TODO: 2017/10/27 替换className为真正需要启动的class
-        String targetClass = className;
-        if (!className.contains("MainActivity")) {
-            targetClass = RESOURCES_PACKAGE_NAME + ".PluginSampleActivity";
+        // 2017/10/27 替换className为真正需要启动的class
+        String realClass = intent.getStringExtra(Constants.KEY_TARGET_ACTIVITY);
+        if (!TextUtils.isEmpty(realClass)) {
+            Log.i(TAG, String.format("newActivity[%s : %s]", className, realClass));
+            Activity activity = mOrigin.newActivity(cl, realClass, intent);
+            activity.setIntent(intent);
+            return activity;
         }
-        return mOrigin.newActivity(cl, targetClass, intent);
+        return mOrigin.newActivity(cl, className, intent);
     }
 
 }
