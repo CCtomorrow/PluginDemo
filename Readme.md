@@ -1,3 +1,2 @@
 #### 关于插件化的Demo
-#### 照着这里写的Demo 
-[Android插件化原理解析——概要](http://weishu.me/2016/01/28/understand-plugin-framework-overview/)
+插件化系列文章[插件化学习](http://www.jianshu.com/nb/2692674)
