@@ -1,5 +1,2 @@
-include ':dynamic_proxy'
-include ':binder_sample'
-include ':javaproxy'
-include ':javareflection'
+include ':plugin_lib'
 include ':activity_plugin'

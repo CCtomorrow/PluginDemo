@@ -3,7 +3,7 @@ package com.example.activityplugin;
 import android.content.Context;
 import android.util.Log;
 
-import com.qyai.activityplugin.manager.HookManager;
+import com.qiyo.plugin.lib.manager.HookManager;
 
 /**
  * <b>Project:</b> PluginDemo <br>
